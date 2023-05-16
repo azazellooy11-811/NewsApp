@@ -13,6 +13,8 @@ final class SelectedNewsViewController: UIViewController {
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = true
+        scrollView.contentSize = self.view.frame.size
+
         return scrollView
     }()
     
@@ -87,32 +89,32 @@ final class SelectedNewsViewController: UIViewController {
     
     private func setupConstraints() {
         scrollView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()//.width.equalTo(view.safeAreaLayoutGuide)
-            //make.bottom.equalTo(view.safeAreaLayoutGuide)
+            make.edges.equalToSuperview()
         }
         
         contentView.snp.makeConstraints { make in
-            make.width.edges.equalToSuperview()//.equalTo(view.safeAreaLayoutGuide)
-        }
+            make.trailing.leading.equalTo(view.safeAreaLayoutGuide).inset(5)
+                        make.top.equalToSuperview()
+                }
         
         titleLabel.snp.makeConstraints { make in
-            make.leading.trailing.top.equalTo(view.safeAreaLayoutGuide).inset(5)
+            make.leading.trailing.top.equalToSuperview().inset(5)
         }
         
         imageView.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(5)
-            make.top.equalTo(titleLabel.snp.bottom).offset(10)
-            make.height.equalTo(view.snp.width)
+            make.leading.trailing.equalTo(titleLabel)
+                        make.top.equalTo(titleLabel.snp.bottom).offset(10)
+                        make.height.equalTo(view.snp.width)
         }
         
         descriptionText.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(5)
-            make.top.equalTo(imageView.snp.bottom).offset(20)
+            make.leading.trailing.equalTo(imageView)
+                        make.top.equalTo(imageView.snp.bottom).offset(20)
         }
         
         timeLabel.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(5)
-            make.top.equalTo(descriptionText.snp.bottom).offset(10)
+            make.leading.trailing.equalTo(descriptionText)
+                        make.top.equalTo(descriptionText.snp.bottom).offset(10)
         }
     }
 }

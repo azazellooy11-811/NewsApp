@@ -8,18 +8,37 @@
 import Foundation
 
 final class ApiManager {
+    enum Category: String {
+        case general = "general"
+        case business = "business"
+        case technology = "technology"
+    }
+    
+    // MARK: - Properties
     private static let apiKey = "d58e13a3488b4fcb8535e076287bf9a9"
     private static let baseUrl = "https://newsapi.org/v2/"
-    private static let path = "everything"
+    private static let path = "top-headlines"
+    
+    // MARK: - Methods
     
     // Create url path and make request
-    static func getNews(completion: @escaping (Result<[ArticleResponseObject], Error>) -> ()) {
-        let stringUrl = baseUrl + path + "?sources=bbc-news&language=en" + "&apiKey=\(apiKey)"
+    static func getNews(from category: Category,
+                        page: Int,
+                        searchText: String?,
+                        completion: @escaping (Result<[ArticleResponseObject], Error>) -> ()) {
+        var searchParameter = ""
+        if let searchText {
+            searchParameter = "&q=\(searchText)"
+        }
+        
+        let stringUrl = baseUrl + path + "?category=\(category.rawValue)&language=en&page=\(page)" + searchParameter + "&apiKey=\(apiKey)"
         
         guard let url = URL(string: stringUrl) else { return }
         
         let session = URLSession.shared.dataTask(with: url) { data, _, error in
-            handleResponse(data: data, error: error, completion: completion)
+            handleResponse(data: data,
+                           error: error,
+                           completion: completion)
         }
         
         session.resume()
@@ -48,6 +67,9 @@ final class ApiManager {
         if let error {
             completion(.failure(NetworkingError.networkingError(error)))
         } else if let data {
+            let json = try? JSONSerialization.jsonObject(with: data, options: [])
+            print(json ?? "")
+            
             do {
                 let model = try JSONDecoder().decode(NewsResponseObject.self, from: data)
                 completion(.success(model.articles))
