@@ -13,6 +13,8 @@ final class SelectedNewsViewController: UIViewController {
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = true
+        scrollView.contentSize = self.view.frame.size
+
         return scrollView
     }()
     
@@ -20,30 +22,44 @@ final class SelectedNewsViewController: UIViewController {
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Title"
+        label.numberOfLines = 0
         return label
     }()
     
     private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "image")
+        
+        imageView.contentMode = .scaleAspectFill
+        imageView.layer.masksToBounds = true
+        
         return imageView
     }()
     
     private lazy  var descriptionText: UILabel = {
         let textView = UILabel()
-        textView.text = "Description. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
         textView.numberOfLines = 0
         return textView
     }()
     
     private lazy var timeLabel: UILabel = {
         let label = UILabel()
-        label.text = "11:11:11"
         return label
     }()
     
+    // MARK: - Properties
+    private let viewModel: NewsViewModelProtocol
+    
     // MARK: - Life Cycle
+    init(viewModel: NewsViewModelProtocol) {
+        self.viewModel = viewModel
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -61,37 +77,48 @@ final class SelectedNewsViewController: UIViewController {
         contentView.addSubview(descriptionText)
         contentView.addSubview(timeLabel)
         
+        titleLabel.text = viewModel.title
+        descriptionText.text = viewModel.description
+        timeLabel.text = viewModel.date
+        
+        if let data = viewModel.imageData,
+            let image = UIImage(data: data) {
+            imageView.image = image
+        } else {
+            imageView.image = UIImage(named: "image")
+        }
+        
         setupConstraints()
     }
     
     private func setupConstraints() {
         scrollView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         
         contentView.snp.makeConstraints { make in
-            make.width.edges.equalToSuperview()
-        }
+            make.trailing.leading.equalTo(view.safeAreaLayoutGuide).inset(5)
+                        make.top.equalToSuperview()
+                }
         
         titleLabel.snp.makeConstraints { make in
-            make.leading.trailing.top.equalTo(view.safeAreaLayoutGuide).inset(5)
+            make.leading.trailing.top.equalToSuperview().inset(5)
         }
         
         imageView.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(5)
-            make.top.equalTo(titleLabel.snp.bottom).offset(10)
-            make.height.equalTo(view.snp.width)
+            make.leading.trailing.equalTo(titleLabel)
+                        make.top.equalTo(titleLabel.snp.bottom).offset(10)
+                        make.height.equalTo(view.snp.width)
         }
         
         descriptionText.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(5)
-            make.top.equalTo(imageView.snp.bottom).offset(20)
+            make.leading.trailing.equalTo(imageView)
+                        make.top.equalTo(imageView.snp.bottom).offset(20)
         }
         
         timeLabel.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(5)
-            make.top.equalTo(descriptionText.snp.bottom).offset(10)
+            make.leading.trailing.equalTo(descriptionText)
+                        make.top.equalTo(descriptionText.snp.bottom).offset(10)
         }
     }
 }

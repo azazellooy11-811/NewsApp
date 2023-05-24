@@ -1,29 +1,21 @@
 //
-//  GeneralCollectionViewCell.swift
+//  DetailsCollectionViewCell.swift
 //  NewsApp
 //
-//  Created by Азалия Халилова on 27.04.2023.
+//  Created by Азалия Халилова on 05.05.2023.
 //
 
 import UIKit
 import SnapKit
 
-final class GeneralCollectionViewCell: UICollectionViewCell {
-    // MARK: - GUI Variables
+final class DetailsCollectionViewCell: UICollectionViewCell {
+    // MARK: GUI Variables
     private lazy var imageView: UIImageView = {
         let view = UIImageView()
         
+        view.image = UIImage(named: "image")
         view.contentMode = .scaleAspectFill
         view.layer.masksToBounds = true
-        
-        return view
-    }()
-    
-    private lazy var blackView: UIView = {
-        let view = UIView()
-        
-        view.backgroundColor = .black
-        view.alpha = 0.5
         
         return view
     }()
@@ -31,11 +23,23 @@ final class GeneralCollectionViewCell: UICollectionViewCell {
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         
-        label.text = "Title"
-        label.textColor = .white
+        label.font = .boldSystemFont(ofSize: 16)
+        label.textColor = .black
+        label.numberOfLines = 2
         
         return label
     }()
+    
+    private lazy var descriptionLabel: UILabel = {
+        let label = UILabel()
+        
+        label.font = .systemFont(ofSize: 14)
+        label.textColor = .gray
+        label.numberOfLines = 2
+        
+        return label
+    }()
+    
     // MARK: - Initializations
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -61,25 +65,27 @@ final class GeneralCollectionViewCell: UICollectionViewCell {
     // MARK: - Private methods
     private func setupUI() {
         addSubview(imageView)
-        addSubview(blackView)
         addSubview(titleLabel)
+        addSubview(descriptionLabel)
         
         setupConstraints()
     }
     
     private func setupConstraints() {
         imageView.snp.makeConstraints { make in
-            make.size.edges.equalToSuperview()
-        }
-        
-        blackView.snp.makeConstraints { make in
-            make.leading.trailing.bottom.equalToSuperview()
-            make.height.equalTo(50)
+            make.height.width.equalTo(self.frame.height)
+            make.top.leading.bottom.equalToSuperview()
         }
         
         titleLabel.snp.makeConstraints { make in
-            make.top.bottom.equalTo(blackView)
-            make.leading.trailing.equalTo(blackView).offset(5)
+            make.top.trailing.equalToSuperview()
+            make.leading.equalTo(imageView.snp.trailing).offset(5)
+        }
+        
+        descriptionLabel.snp.makeConstraints { make in
+            make.trailing.equalToSuperview()
+            make.leading.equalTo(imageView.snp.trailing).offset(5)
+            make.top.equalTo(titleLabel.snp.bottom).offset(5)
         }
     }
 }

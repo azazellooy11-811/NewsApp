@@ -1,14 +1,13 @@
 //
-//  GeneralCollectionViewCell.swift
+//  TechnologyCollectionViewCell.swift
 //  NewsApp
 //
-//  Created by Азалия Халилова on 27.04.2023.
+//  Created by Азалия Халилова on 23.05.2023.
 //
 
 import UIKit
-import SnapKit
 
-final class GeneralCollectionViewCell: UICollectionViewCell {
+final class TechnologyCollectionViewCell: UICollectionViewCell {
     // MARK: - GUI Variables
     private lazy var imageView: UIImageView = {
         let view = UIImageView()
@@ -36,6 +35,7 @@ final class GeneralCollectionViewCell: UICollectionViewCell {
         
         return label
     }()
+    
     // MARK: - Initializations
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -69,7 +69,7 @@ final class GeneralCollectionViewCell: UICollectionViewCell {
     
     private func setupConstraints() {
         imageView.snp.makeConstraints { make in
-            make.size.edges.equalToSuperview()
+            make.edges.size.equalToSuperview().inset(5)
         }
         
         blackView.snp.makeConstraints { make in

@@ -1,35 +1,31 @@
 //
-//  GeneralViewController.swift
+//  BusinessViewController.swift
 //  NewsApp
 //
 //  Created by Азалия Халилова on 27.04.2023.
 //
 
 import UIKit
+
+import UIKit
 import SnapKit
 
-final class GeneralViewController: UIViewController {
+final class BusinessViewController: UIViewController {
     // MARK: - GUI Variables
-    private lazy var searchBar: UISearchBar = {
-        let searchBar = UISearchBar()
-        
-        searchBar.delegate = self
-        
-        return searchBar
-    }()
-    
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
-        let width = (view.frame.width - 15) / 2
-        layout.itemSize = CGSize(width: width, height: width)
+        
         layout.minimumLineSpacing = 5
         layout.minimumInteritemSpacing = 5
-        //layout.scrollDirection = .horizontal
+        layout.sectionInset = UIEdgeInsets(top: 20,
+                                           left: 20,
+                                           bottom: 20,
+                                           right: 20)
         
         let collectionView = UICollectionView(frame: CGRect(x: 0,
                                                             y: 0,
                                                             width: view.frame.width,
-                                                            height: view.frame.height - searchBar.frame.height),
+                                                            height: view.frame.height),
                                               collectionViewLayout: layout)
         collectionView.dataSource = self
         collectionView.delegate = self
@@ -42,9 +38,7 @@ final class GeneralViewController: UIViewController {
     // MARK: - Initialization
     init(viewModel: NewsListViewModelProtocol) {
         self.viewModel = viewModel
-        
         super.init(nibName: nil, bundle: nil)
-        
         self.setupViewModel()
     }
     
@@ -59,9 +53,13 @@ final class GeneralViewController: UIViewController {
         setupUI()
         collectionView.register(GeneralCollectionViewCell.self,
                                 forCellWithReuseIdentifier: "GeneralCollectionViewCell")
+        collectionView.register(DetailsCollectionViewCell.self,
+                                forCellWithReuseIdentifier: "DetailsCollectionViewCell")
+        
         viewModel.loadData(searchText: nil)
     }
     // MARK: - Methods
+    
     // MARK: - Private methods
     private func setupViewModel() {
         viewModel.reloadData = { [weak self] in
@@ -73,40 +71,27 @@ final class GeneralViewController: UIViewController {
         }
         
         viewModel.showError = { error in
-            let alert = UIAlertController(title: "Error",
-                                                      message: "\(error)",
-                                                      preferredStyle: .alert)
-            let action = UIAlertAction(title: "OK", style: .default)
-            
-            alert.addAction(action)
-            
-            self.present(alert, animated: true)
+            // TODO: - show alert with error
+            print(error)
         }
     }
-    
     private func setupUI() {
         view.backgroundColor = .white
-        view.addSubview(searchBar)
         view.addSubview(collectionView)
-        
         setupConstraints()
     }
     
     private func setupConstraints() {
-        searchBar.snp.makeConstraints { make in
-            make.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
-        }
         
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(searchBar.snp.bottom)
             make.leading.trailing.equalToSuperview().inset(5)
-            make.bottom.equalTo(view.safeAreaLayoutGuide)
+            make.top.bottom.equalTo(view.safeAreaLayoutGuide)
         }
     }
 }
 
 // MARK: - UICollectionViewDataSource
-extension GeneralViewController: UICollectionViewDataSource {
+extension BusinessViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         viewModel.sections.count
     }
@@ -116,15 +101,31 @@ extension GeneralViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let article = viewModel.sections[indexPath.section].items[indexPath.row] as? ArticleCellViewModel,
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GeneralCollectionViewCell", for: indexPath) as? GeneralCollectionViewCell else { return UICollectionViewCell() }
-        cell.set(article: article)
-        return cell
+        guard let article = viewModel.sections[indexPath.section].items[indexPath.row] as? ArticleCellViewModel else { return UICollectionViewCell() }
+        
+        if indexPath.section == 0 {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GeneralCollectionViewCell",
+                                                      for: indexPath)
+            as? GeneralCollectionViewCell
+            
+            cell?.set(article: article)
+            
+            return cell ?? UICollectionViewCell()
+        } else {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DetailsCollectionViewCell",
+                                                      for: indexPath)
+            as? DetailsCollectionViewCell
+            
+            cell?.set(article: article)
+            
+            return cell ?? UICollectionViewCell()
+        }
     }
 }
 
 // MARK: - UICollectionViewDelegate
-extension GeneralViewController: UICollectionViewDelegate{
+extension BusinessViewController: UICollectionViewDelegate {
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let article = viewModel.sections[indexPath.section].items[indexPath.row] as? ArticleCellViewModel else { return }
         navigationController?.pushViewController(SelectedNewsViewController(viewModel: NewsViewModel(article: article)), animated: true)
@@ -134,24 +135,19 @@ extension GeneralViewController: UICollectionViewDelegate{
                         willDisplay cell: UICollectionViewCell,
                         forItemAt indexPath: IndexPath) {
         //print(indexPath.row)
-        if indexPath.row == (viewModel.sections[0].items.count - 12) {
-            viewModel.loadData(searchText: searchBar.text)
+        if indexPath.row == (viewModel.sections[1].items.count - 12) {
+            viewModel.loadData(searchText: nil)
         }
     }
 }
 
-// MARK: - UISearchBarDelegate
-extension GeneralViewController: UISearchBarDelegate {
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        guard let text = searchBar.text?.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
-        
-        viewModel.loadData(searchText: text)
-        searchBar.searchTextField.resignFirstResponder()
-    }
-    
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        if searchText.isEmpty {
-            viewModel.loadData(searchText: nil)
-        }
+// MARK: - UICollectionViewDelegateFlowLayout
+extension BusinessViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let firstSectionItemSize = CGSize(width: view.frame.width,
+                                          height: view.frame.width)
+        let secondSectionItemSize = CGSize(width: view.frame.width,
+                                           height: 100)
+        return indexPath.section == 0 ? firstSectionItemSize : secondSectionItemSize
     }
 }
