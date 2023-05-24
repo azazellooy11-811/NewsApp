@@ -28,6 +28,10 @@ final class SelectedNewsViewController: UIViewController {
     
     private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
+        
+        imageView.contentMode = .scaleAspectFill
+        imageView.layer.masksToBounds = true
+        
         return imageView
     }()
     
